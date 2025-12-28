@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface BrandService {
     ResultWithValue<PagedBrandsDTO> getPagedBrands(int page, int rowsPerPage);
-    ResultWithoutValue createBrand(BrandCreateDTO dto, Short tokenUserId);
-    ResultWithoutValue updateBrand(Short brandId, BrandUpdateDTO dto, Short tokenUserId);
-    ResultWithoutValue deleteBrand(Short brandId, Short tokenUserId);
+    ResultWithoutValue createBrand(BrandCreateDTO dto);
+    ResultWithoutValue updateBrand(Short brandId, BrandUpdateDTO dto);
+    ResultWithoutValue deleteBrand(Short brandId);
     ResultWithValue<List<BrandDTO>> getBrandsForDropdown();
 }

@@ -1,8 +1,5 @@
 package com.hairstudio.api.controller;
 
-import com.hairstudio.api.common.ResultWithoutValue;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ProductTypeController {
 
     private final ProductTypeService productTypeService;
-    private final CurrentUserContext currentUserContext;
 
     @GetMapping
     public ResponseEntity<?> getPagedProductTypes(@RequestParam int page, @RequestParam int rowsPerPage) {
@@ -37,11 +33,7 @@ public class ProductTypeController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping
     public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = productTypeService.createProductType(dto, userId);
+        var result = productTypeService.createProductType(dto);
         return result.toResponseEntity();
     }
 
@@ -49,22 +41,14 @@ public class ProductTypeController {
     @PutMapping("/{productTypeId}")
     public ResponseEntity<?> updateProductType(@PathVariable Short productTypeId,
                                          @Valid @RequestBody ProductTypeUpdateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = productTypeService.updateProductType(productTypeId, dto, userId);
+        var result = productTypeService.updateProductType(productTypeId, dto);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @DeleteMapping("/{productTypeId}")
     public ResponseEntity<?> deleteProductType(@PathVariable Short productTypeId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = productTypeService.deleteProductType(productTypeId, userId);
+        var result = productTypeService.deleteProductType(productTypeId);
         return result.toResponseEntity();
     }
 

@@ -1,9 +1,6 @@
 package com.hairstudio.api.controller;
 
 import com.hairstudio.api.common.Result;
-import com.hairstudio.api.common.ResultWithoutValue;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import com.hairstudio.api.dto.reservations.EmployeeReservationCreateDTO;
 import com.hairstudio.api.dto.reservations.UserReservationCreateDTO;
 import com.hairstudio.api.service.ReservationService;
@@ -30,19 +27,13 @@ import java.time.LocalDate;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final CurrentUserContext currentUserContext;
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).USER.getRoleName()) or " +
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).EMPLOYEE.getRoleName()) or " +
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping("/create-reservation")
     public ResponseEntity<?> createUserReservation(@RequestBody UserReservationCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        Result result = reservationService.createUserReservation(userId, dto);
+        Result result = reservationService.createUserReservation(dto);
         return result.toResponseEntity();
     }
 
@@ -51,12 +42,7 @@ public class ReservationController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping("/create-employee-reservation")
     public ResponseEntity<?> createEmployeeReservation(@RequestBody EmployeeReservationCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        Result result = reservationService.createEmployeeReservation(userId, dto);
+        Result result = reservationService.createEmployeeReservation(dto);
         return result.toResponseEntity();
     }
 
@@ -66,12 +52,7 @@ public class ReservationController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
     ) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        Result result = reservationService.getEmployeeReservations(userId, employeeId, dateFrom, dateTo);
+        Result result = reservationService.getEmployeeReservations(employeeId, dateFrom, dateTo);
         return result.toResponseEntity();
     }
 
@@ -80,12 +61,7 @@ public class ReservationController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @GetMapping("/reservation-details/{reservationId}")
     public ResponseEntity<?> getReservationDetails(@PathVariable short reservationId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        Result result = reservationService.getReservationDetails(userId, reservationId);
+        Result result = reservationService.getReservationDetails(reservationId);
         return result.toResponseEntity();
     }
 
@@ -94,12 +70,7 @@ public class ReservationController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping("/{reservationId}")
     public ResponseEntity<?> cancelReservation(@PathVariable short reservationId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        Result result = reservationService.cancelReservation(userId, reservationId);
+        Result result = reservationService.cancelReservation(reservationId);
         return result.toResponseEntity();
     }
 

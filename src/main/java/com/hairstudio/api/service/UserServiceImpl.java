@@ -28,6 +28,7 @@ import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.EmailConfirmationRepository;
 import com.hairstudio.api.repository.RoleRepository;
 import com.hairstudio.api.repository.PasswordResetTokenRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import com.hairstudio.api.security.CustomUserDetails;
 import com.hairstudio.api.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,7 @@ public class UserServiceImpl implements UserService {
 
     @Value("${frontend.url}")
     private String frontendUrl;
+    private final CurrentUserContext currentUserContext;
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
@@ -222,8 +224,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_USER")
-    public ResultWithoutValue createUser(UserCreateDTO dto, Short tokenUserId) {
-        Optional<User> createdByOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue createUser(UserCreateDTO dto) {
+        Optional<User> createdByOpt = userRepository.findById(currentUserContext.getUserId());
         if (createdByOpt.isEmpty()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -321,9 +323,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Auditable(action = "DELETE_USER")
-    public ResultWithoutValue deleteUser(Short userId, Short tokenUserId) {
+    public ResultWithoutValue deleteUser(Short userId) {
         Optional<User> userOpt = userRepository.findById(userId);
-        Optional<User> tokenUserOpt = userRepository.findById(tokenUserId);
+        Optional<User> tokenUserOpt = userRepository.findById(currentUserContext.getUserId());
 
         if (userOpt.isEmpty() || tokenUserOpt.isEmpty())
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
@@ -348,9 +350,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_USER")
-    public ResultWithoutValue updateUser(Short userId, UserUpdateDTO dto, Short tokenUserId) {
+    public ResultWithoutValue updateUser(Short userId, UserUpdateDTO dto) {
         Optional<User> existingUserOpt = userRepository.findByUserIdWithRoles(userId);
-        Optional<User> tokenUserOpt = userRepository.findById(tokenUserId);
+        Optional<User> tokenUserOpt = userRepository.findById(currentUserContext.getUserId());
 
         if (existingUserOpt.isEmpty() || tokenUserOpt.isEmpty())
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
@@ -413,8 +415,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_PASSWORD")
-    public ResultWithoutValue updatePassword(Short tokenUserId, PasswordUpdateDTO dto) {
-        Optional<User> userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue updatePassword(PasswordUpdateDTO dto) {
+        Optional<User> userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty())
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
 

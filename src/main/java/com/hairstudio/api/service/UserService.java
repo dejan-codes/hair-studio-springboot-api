@@ -20,11 +20,11 @@ public interface UserService {
     ResultWithoutValue userPasswordReset(String email);
     ResultWithValue<TokenDTO> login(LoginDTO loginDTO);
     ResultWithoutValue resendConfirmationCode(String email);
-    ResultWithoutValue createUser(UserCreateDTO dto, Short tokenUserId);
-    ResultWithoutValue deleteUser(Short userId, Short tokenUserId);
+    ResultWithoutValue createUser(UserCreateDTO dto);
+    ResultWithoutValue deleteUser(Short userId);
     ResultWithValue<List<EmployeeDropdownDTO>> getEmployeeForDropdown();
     ResultWithValue<PagedUsersDTO> getUsersForAdmin(int page, int rowsPerPage, String search);
     ResultWithValue<List<EmployeeDetailsDTO>> getEmployees();
-    ResultWithoutValue updateUser(Short userId, UserUpdateDTO dto, Short tokenUserId);
-    ResultWithoutValue updatePassword(Short tokenUserId, PasswordUpdateDTO dto);
+    ResultWithoutValue updateUser(Short userId, UserUpdateDTO dto);
+    ResultWithoutValue updatePassword(PasswordUpdateDTO dto);
 }

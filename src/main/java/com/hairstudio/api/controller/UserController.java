@@ -1,6 +1,5 @@
 package com.hairstudio.api.controller;
 
-import com.hairstudio.api.common.ResultWithoutValue;
 import com.hairstudio.api.dto.users.EmailConfirmationDTO;
 import com.hairstudio.api.dto.users.LoginDTO;
 import com.hairstudio.api.dto.users.PasswordResetDTO;
@@ -9,8 +8,6 @@ import com.hairstudio.api.dto.users.UserCreateDTO;
 import com.hairstudio.api.dto.users.UserRegistrationDTO;
 import com.hairstudio.api.dto.users.UserUpdateDTO;
 import com.hairstudio.api.dto.users.PasswordUpdateDTO;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import com.hairstudio.api.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final CurrentUserContext currentUserContext;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationDTO dto) {
@@ -68,22 +64,14 @@ public class UserController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @ModelAttribute UserCreateDTO dto) {
-        Short tokenUserId = currentUserContext.getUserId();
-        if (tokenUserId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = userService.createUser(dto, tokenUserId);
+        var result = userService.createUser(dto);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Short userId) {
-        Short tokenUserId = currentUserContext.getUserId();
-        if (tokenUserId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = userService.deleteUser(userId, tokenUserId);
+        var result = userService.deleteUser(userId);
         return result.toResponseEntity();
     }
 
@@ -111,11 +99,7 @@ public class UserController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping("/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable Short userId, @Valid @ModelAttribute UserUpdateDTO dto) {
-        Short tokenUserId = currentUserContext.getUserId();
-        if (tokenUserId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = userService.updateUser(userId, dto, tokenUserId);
+        var result = userService.updateUser(userId, dto);
         return result.toResponseEntity();
     }
 
@@ -124,11 +108,7 @@ public class UserController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping("/update-password")
     public ResponseEntity<?> updatePassword(@Valid @RequestBody PasswordUpdateDTO dto) {
-        Short tokenUserId = currentUserContext.getUserId();
-        if (tokenUserId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = userService.updatePassword(tokenUserId, dto);
+        var result = userService.updatePassword(dto);
         return result.toResponseEntity();
     }
 }

@@ -14,20 +14,19 @@ import java.util.List;
 
 public interface ReservationService {
 
-    ResultWithoutValue createUserReservation(Short tokenUserId, UserReservationCreateDTO dto);
+    ResultWithoutValue createUserReservation(UserReservationCreateDTO dto);
 
-    ResultWithoutValue createEmployeeReservation(Short tokenUserId, EmployeeReservationCreateDTO dto);
+    ResultWithoutValue createEmployeeReservation(EmployeeReservationCreateDTO dto);
 
     ResultWithValue<List<ReservationSummaryDTO>> getEmployeeReservations(
-            Short tokenUserId,
             int employeeId,
             LocalDate from,
             LocalDate to
     );
 
-    ResultWithValue<ReservationDetailsDTO> getReservationDetails(Short tokenUserId, short reservationId);
+    ResultWithValue<ReservationDetailsDTO> getReservationDetails(short reservationId);
 
-    ResultWithoutValue cancelReservation(Short tokenUserId, short reservationId);
+    ResultWithoutValue cancelReservation(short reservationId);
 
     byte[] exportCalendar(Instant from, Instant to) throws IOException;
 }

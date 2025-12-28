@@ -18,19 +18,19 @@ public interface ProductService {
 
     ResultWithValue<List<ProductDisplayDTO>> getMostPopularProducts();
 
-    ResultWithValue<PagedOrdersDTO> getOrders(short tokenUserId, int page, int rowsPerPage);
+    ResultWithValue<PagedOrdersDTO> getOrders(int page, int rowsPerPage);
 
-    ResultWithoutValue createProduct(ProductCreateDTO dto, short tokenUserId);
+    ResultWithoutValue createProduct(ProductCreateDTO dto);
 
-    ResultWithValue<UrlResponseDTO> buyProducts(List<BuyProductDTO> dtoList, short tokenUserId);
+    ResultWithValue<UrlResponseDTO> buyProducts(List<BuyProductDTO> dtoList);
 
     Object getSessionDetails(String sessionId);
 
     ResultWithoutValue handleStripeWebhook(String payload, String stripeSignature);
 
-    ResultWithoutValue updateProduct(short productId, ProductUpdateDTO dto, short tokenUserId);
+    ResultWithoutValue updateProduct(short productId, ProductUpdateDTO dto);
 
-    ResultWithoutValue changeOrderStatus(short orderId, short orderStatusId, short tokenUserId);
+    ResultWithoutValue changeOrderStatus(short orderId, short orderStatusId);
 
-    ResultWithoutValue deleteProduct(short productId, short tokenUserId);
+    ResultWithoutValue deleteProduct(short productId);
 }

@@ -4,5 +4,5 @@ import com.hairstudio.api.common.ResultWithValue;
 import com.hairstudio.api.dto.messages.PagedMessagesDTO;
 
 public interface MessageService {
-     ResultWithValue<PagedMessagesDTO> getMessages(short tokenUserId, int page, int rowsPerPage);
+     ResultWithValue<PagedMessagesDTO> getMessages(int page, int rowsPerPage);
 }

@@ -37,6 +37,7 @@ import com.hairstudio.api.repository.ProductTypeRepository;
 import com.hairstudio.api.repository.OrderRepository;
 import com.hairstudio.api.repository.MessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hairstudio.api.security.CurrentUserContext;
 import com.stripe.Stripe;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
@@ -66,6 +67,7 @@ import java.util.Optional;
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private final CurrentUserContext currentUserContext;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final PaymentStatusRepository paymentStatusRepository;
@@ -164,12 +166,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResultWithValue<PagedOrdersDTO> getOrders(short tokenUserId, int page, int rowsPerPage) {
+    public ResultWithValue<PagedOrdersDTO> getOrders(int page, int rowsPerPage) {
         if (page < 1 || rowsPerPage < 1) {
             return ResultWithValue.failure(ValidationErrors.NUMBER_OF_PAGES);
         }
 
-        var userOpt = userRepository.findById(tokenUserId);
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -191,7 +193,7 @@ public class ProductServiceImpl implements ProductService {
         } else {
             filteredOrders = allOrders.stream()
                     .filter(order -> order.getUser() != null &&
-                            order.getUser().getUserId().equals(tokenUserId))
+                            order.getUser().getUserId().equals(currentUserContext.getUserId()))
                     .toList();
         }
 
@@ -229,8 +231,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_PRODUCT")
-    public ResultWithoutValue createProduct(ProductCreateDTO dto, short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue createProduct(ProductCreateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -281,8 +283,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Auditable(action = "BUY_PRODUCTS")
-    public ResultWithValue<UrlResponseDTO> buyProducts(List<BuyProductDTO> dtoList, short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithValue<UrlResponseDTO> buyProducts(List<BuyProductDTO> dtoList) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -352,7 +354,7 @@ public class ProductServiceImpl implements ProductService {
             UrlResponseDTO urlResponse = new UrlResponseDTO(session.getUrl());
             return ResultWithValue.success(urlResponse);
         } catch (Exception e) {
-            log.error("Failed to create Stripe session for userId={} and orderId={}", tokenUserId, order.getOrderId(), e);
+            log.error("Failed to create Stripe session for userId={} and orderId={}", currentUserContext.getUserId(), order.getOrderId(), e);
             return ResultWithValue.failure(ValidationErrors.INVALID_DATA);
         }
     }
@@ -419,8 +421,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_PRODUCT")
-    public ResultWithoutValue updateProduct(short productId, ProductUpdateDTO dto, short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue updateProduct(short productId, ProductUpdateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -474,8 +476,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Auditable(action = "CHANGE_ORDER_STATUS")
-    public ResultWithoutValue changeOrderStatus(short orderId, short orderStatusId, short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue changeOrderStatus(short orderId, short orderStatusId) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -520,8 +522,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @Auditable(action = "DELETE_PRODUCT")
-    public ResultWithoutValue deleteProduct(short productId, short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue deleteProduct(short productId) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }

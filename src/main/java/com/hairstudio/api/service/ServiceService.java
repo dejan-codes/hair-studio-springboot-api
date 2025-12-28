@@ -12,16 +12,16 @@ import java.util.List;
 
 public interface ServiceService {
 
-    ResultWithoutValue createService(ServiceCreateDTO dto, Short tokenUserId);
+    ResultWithoutValue createService(ServiceCreateDTO dto);
 
-    ResultWithValue<List<ServiceDropdownDTO>> getServicesForDropdown(Short tokenUserId);
+    ResultWithValue<List<ServiceDropdownDTO>> getServicesForDropdown();
 
     ResultWithValue<PagedServicesDTO> getAllServices(int page, int rowsPerPage);
 
     ResultWithValue<ServicesByGenderDTO> getServicesByGender();
 
-    ResultWithoutValue updateService(Short serviceId, ServiceUpdateDTO dto, Short tokenUserId);
+    ResultWithoutValue updateService(Short serviceId, ServiceUpdateDTO dto);
 
-    ResultWithoutValue deleteService(Short serviceId, Short tokenUserId);
+    ResultWithoutValue deleteService(Short serviceId);
 
 }

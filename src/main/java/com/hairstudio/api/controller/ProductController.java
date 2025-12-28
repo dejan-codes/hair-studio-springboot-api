@@ -1,9 +1,6 @@
 package com.hairstudio.api.controller;
 
-import com.hairstudio.api.common.ResultWithoutValue;
 import com.hairstudio.api.dto.products.BuyProductDTO;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,7 +27,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    private final CurrentUserContext currentUserContext;
 
     @GetMapping
     public ResponseEntity<?> getProducts(@RequestParam int page,
@@ -56,24 +52,14 @@ public class ProductController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @GetMapping("/orders")
     public ResponseEntity<?> getOrders(@RequestParam int page, @RequestParam int rowsPerPage) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.getOrders(userId, page, rowsPerPage);
+        var result = productService.getOrders(page, rowsPerPage);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> createProduct(@ModelAttribute ProductCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.createProduct(dto, userId);
+        var result = productService.createProduct(dto);
         return result.toResponseEntity();
     }
 
@@ -82,12 +68,7 @@ public class ProductController {
             "hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping("/buy")
     public ResponseEntity<?> buyProducts(@RequestBody List<BuyProductDTO> dtoList) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.buyProducts(dtoList, userId);
+        var result = productService.buyProducts(dtoList);
         return result.toResponseEntity();
     }
 
@@ -107,36 +88,21 @@ public class ProductController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping(path = "{productId}", consumes = "multipart/form-data")
     public ResponseEntity<?> updateProduct(@PathVariable short productId, @ModelAttribute ProductUpdateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.updateProduct(productId, dto, userId);
+        var result = productService.updateProduct(productId, dto);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping("/change-order-status")
     public ResponseEntity<?> changeOrderStatus(@RequestParam short orderId, @RequestParam short status) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.changeOrderStatus(orderId, status, userId);
+        var result = productService.changeOrderStatus(orderId, status);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable short productId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = productService.deleteProduct(productId, userId);
+        var result = productService.deleteProduct(productId);
         return result.toResponseEntity();
     }
 }

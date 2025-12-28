@@ -15,6 +15,7 @@ import com.hairstudio.api.model.entity.Message;
 import com.hairstudio.api.repository.ProductTypeRepository;
 import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.UserRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductTypeServiceImpl implements ProductTypeService {
 
+    private final CurrentUserContext currentUserContext;
     private final ProductTypeRepository productTypeRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
@@ -51,8 +53,8 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_PRODUCT_TYPE")
-    public ResultWithoutValue createProductType(ProductTypeCreateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue createProductType(ProductTypeCreateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -80,8 +82,8 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_PRODUCT_TYPE")
-    public ResultWithoutValue updateProductType(Short productTypeId, ProductTypeUpdateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue updateProductType(Short productTypeId, ProductTypeUpdateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -108,8 +110,8 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Override
     @Transactional
     @Auditable(action = "DELETE_PRODUCT_TYPE")
-    public ResultWithoutValue deleteProductType(Short productTypeId, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue deleteProductType(Short productTypeId) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }

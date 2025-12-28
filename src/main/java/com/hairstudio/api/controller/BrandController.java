@@ -1,8 +1,5 @@
 package com.hairstudio.api.controller;
 
-import com.hairstudio.api.common.ResultWithoutValue;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class BrandController {
 
     private final BrandService brandService;
-    private final CurrentUserContext currentUserContext;
 
     @GetMapping
     public ResponseEntity<?> getPagedBrands(@RequestParam int page, @RequestParam int rowsPerPage) {
@@ -37,11 +33,7 @@ public class BrandController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping
     public ResponseEntity<?> createBrand(@Valid @RequestBody BrandCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = brandService.createBrand(dto, userId);
+        var result = brandService.createBrand(dto);
         return result.toResponseEntity();
     }
 
@@ -49,22 +41,14 @@ public class BrandController {
     @PutMapping("/{brandId}")
     public ResponseEntity<?> updateBrand(@PathVariable Short brandId,
                                          @Valid @RequestBody BrandUpdateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = brandService.updateBrand(brandId, dto, userId);
+        var result = brandService.updateBrand(brandId, dto);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @DeleteMapping("/{brandId}")
     public ResponseEntity<?> deleteBrand(@PathVariable Short brandId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-        var result = brandService.deleteBrand(brandId, userId);
+        var result = brandService.deleteBrand(brandId);
         return result.toResponseEntity();
     }
 

@@ -20,6 +20,7 @@ import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.ReservationRepository;
 import com.hairstudio.api.repository.ServiceRepository;
 import com.hairstudio.api.repository.UserRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -55,6 +56,7 @@ import java.util.stream.IntStream;
 @Service
 public class ReservationServiceImpl implements ReservationService {
 
+    private final CurrentUserContext currentUserContext;
     private final ReservationRepository reservationRepository;
     private final ServiceRepository serviceRepository;
     private final UserRepository userRepository;
@@ -67,8 +69,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_USER_RESERVATION")
-    public ResultWithoutValue createUserReservation(Short tokenUserId, UserReservationCreateDTO dto) {
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+    public ResultWithoutValue createUserReservation(UserReservationCreateDTO dto) {
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -114,8 +116,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_EMPLOYEE_RESERVATION")
-    public ResultWithoutValue createEmployeeReservation(Short tokenUserId, EmployeeReservationCreateDTO dto) {
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+    public ResultWithoutValue createEmployeeReservation(EmployeeReservationCreateDTO dto) {
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -167,9 +169,9 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ResultWithValue<List<ReservationSummaryDTO>> getEmployeeReservations(Short tokenUserId, int employeeId,
+    public ResultWithValue<List<ReservationSummaryDTO>> getEmployeeReservations(int employeeId,
                                                                                 LocalDate from, LocalDate to) {
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -201,8 +203,8 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ResultWithValue<ReservationDetailsDTO> getReservationDetails(Short tokenUserId, short reservationId) {
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+    public ResultWithValue<ReservationDetailsDTO> getReservationDetails(short reservationId) {
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -237,8 +239,8 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     @Auditable(action = "CANCEL_RESERVATION")
-    public ResultWithoutValue cancelReservation(Short tokenUserId, short reservationId) {
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+    public ResultWithoutValue cancelReservation(short reservationId) {
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }

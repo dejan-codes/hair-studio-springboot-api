@@ -10,6 +10,7 @@ import com.hairstudio.api.model.entity.Message;
 import com.hairstudio.api.model.entity.Role;
 import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.UserRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,16 +20,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class MessageServiceImpl implements MessageService {
 
+    private final CurrentUserContext currentUserContext;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
     @Override
-    public ResultWithValue<PagedMessagesDTO> getMessages(short tokenUserId, int page, int rowsPerPage) {
+    public ResultWithValue<PagedMessagesDTO> getMessages(int page, int rowsPerPage) {
         if (page < 1 || rowsPerPage < 1) {
             return ResultWithValue.failure(ValidationErrors.NUMBER_OF_PAGES);
         }
 
-        var userOpt = userRepository.findByUserIdWithRoles(tokenUserId);
+        var userOpt = userRepository.findByUserIdWithRoles(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }

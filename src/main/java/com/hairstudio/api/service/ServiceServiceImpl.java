@@ -18,6 +18,7 @@ import com.hairstudio.api.model.enums.RoleEnum;
 import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.ServiceRepository;
 import com.hairstudio.api.repository.UserRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 public class ServiceServiceImpl implements ServiceService {
 
+    private final CurrentUserContext currentUserContext;
     private final ServiceRepository serviceRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
@@ -46,8 +48,8 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_SERVICE")
-    public ResultWithoutValue createService(ServiceCreateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue createService(ServiceCreateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -82,8 +84,8 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public ResultWithValue<List<ServiceDropdownDTO>> getServicesForDropdown(Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithValue<List<ServiceDropdownDTO>> getServicesForDropdown() {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -162,8 +164,8 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_SERVICE")
-    public ResultWithoutValue updateService(Short serviceId, ServiceUpdateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue updateService(Short serviceId, ServiceUpdateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -203,8 +205,8 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     @Transactional
     @Auditable(action = "DELETE_SERVICE")
-    public ResultWithoutValue deleteService(Short serviceId, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue deleteService(Short serviceId) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }

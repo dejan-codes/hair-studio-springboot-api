@@ -1,10 +1,7 @@
 package com.hairstudio.api.controller;
 
-import com.hairstudio.api.common.ResultWithoutValue;
 import com.hairstudio.api.dto.services.ServiceCreateDTO;
 import com.hairstudio.api.dto.services.ServiceUpdateDTO;
-import com.hairstudio.api.errors.UserErrors;
-import com.hairstudio.api.security.CurrentUserContext;
 import com.hairstudio.api.service.ServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,28 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServiceController {
 
     private final ServiceService serviceService;
-    private final CurrentUserContext currentUserContext;
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> createService(@ModelAttribute ServiceCreateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = serviceService.createService(dto, userId);
+        var result = serviceService.createService(dto);
         return result.toResponseEntity();
     }
 
     @GetMapping("/service-dropdown")
     public ResponseEntity<?> getServicesForDropdown() {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = serviceService.getServicesForDropdown(userId);
+        var result = serviceService.getServicesForDropdown();
         return result.toResponseEntity();
     }
 
@@ -65,24 +51,14 @@ public class ServiceController {
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @PutMapping(path = "/{serviceId}", consumes = "multipart/form-data")
     public ResponseEntity<?> updateService(@PathVariable Short serviceId, @ModelAttribute ServiceUpdateDTO dto) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = serviceService.updateService(serviceId, dto, userId);
+        var result = serviceService.updateService(serviceId, dto);
         return result.toResponseEntity();
     }
 
     @PreAuthorize("hasRole(T(com.hairstudio.api.model.enums.RoleEnum).ADMINISTRATOR.getRoleName())")
     @DeleteMapping("/{serviceId}")
     public ResponseEntity<?> deleteService(@PathVariable Short serviceId) {
-        var userId = currentUserContext.getUserId();
-        if (userId == null) {
-            return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND).toResponseEntity();
-        }
-
-        var result = serviceService.deleteService(serviceId, userId);
+        var result = serviceService.deleteService(serviceId);
         return result.toResponseEntity();
     }
 }

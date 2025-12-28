@@ -15,6 +15,7 @@ import com.hairstudio.api.model.entity.Message;
 import com.hairstudio.api.repository.BrandRepository;
 import com.hairstudio.api.repository.MessageRepository;
 import com.hairstudio.api.repository.UserRepository;
+import com.hairstudio.api.security.CurrentUserContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class BrandServiceImpl implements BrandService {
 
+    private final CurrentUserContext currentUserContext;
     private final BrandRepository brandRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
@@ -51,8 +53,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional
     @Auditable(action = "CREATE_BRAND")
-    public ResultWithoutValue createBrand(BrandCreateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue createBrand(BrandCreateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -80,8 +82,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional
     @Auditable(action = "UPDATE_BRAND")
-    public ResultWithoutValue updateBrand(Short brandId, BrandUpdateDTO dto, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue updateBrand(Short brandId, BrandUpdateDTO dto) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
@@ -108,8 +110,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional
     @Auditable(action = "DELETE_BRAND")
-    public ResultWithoutValue deleteBrand(Short brandId, Short tokenUserId) {
-        var userOpt = userRepository.findById(tokenUserId);
+    public ResultWithoutValue deleteBrand(Short brandId) {
+        var userOpt = userRepository.findById(currentUserContext.getUserId());
         if (userOpt.isEmpty() || !userOpt.get().getIsActive()) {
             return ResultWithoutValue.failure(UserErrors.USER_NOT_FOUND);
         }
